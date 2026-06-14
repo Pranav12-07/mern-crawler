@@ -1,0 +1,6 @@
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 24px; }
+.app { max-width: 900px; margin: auto }
+.form { display:flex; gap:12px; align-items:center; margin-bottom: 16px }
+.form label { display:flex; flex-direction:column; font-size:14px }
+.form input { padding:6px 8px; font-size:14px }
+.output { white-space:pre-wrap; background:#f7f7f7; padding:12px; border-radius:6px }

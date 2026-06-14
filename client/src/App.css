@@ -1,6 +1,262 @@
-body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding: 24px; }
-.app { max-width: 900px; margin: auto }
-.form { display:flex; gap:12px; align-items:center; margin-bottom: 16px }
-.form label { display:flex; flex-direction:column; font-size:14px }
-.form input { padding:6px 8px; font-size:14px }
-.output { white-space:pre-wrap; background:#f7f7f7; padding:12px; border-radius:6px }
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #18212f;
+  background: #eef2f6;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.appShell {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  color: #f7fafc;
+  background: #24313f;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #85d3c8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 18px;
+}
+
+.panel {
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 8%);
+}
+
+.form,
+.searchForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  color: #17202b;
+  border: 1px solid #c8d1dc;
+  border-radius: 6px;
+  outline: none;
+  background: #fff;
+}
+
+input:focus {
+  border-color: #2f7d78;
+  box-shadow: 0 0 0 3px rgb(47 125 120 / 18%);
+}
+
+.fieldGrid,
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+button {
+  min-height: 42px;
+  padding: 0 14px;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  background: #2f7d78;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button.ghost {
+  min-height: 34px;
+  color: #2f4f5a;
+  border: 1px solid #c8d1dc;
+  background: #fff;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  overflow: auto;
+}
+
+.notice {
+  padding: 12px 14px;
+  color: #7f1d1d;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stats div,
+.section {
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.stats div {
+  padding: 18px;
+}
+
+.stats span {
+  display: block;
+  font-size: 28px;
+  font-weight: 850;
+}
+
+.stats p,
+.empty,
+.pageItem p {
+  margin-bottom: 0;
+  color: #607086;
+}
+
+.section {
+  padding: 18px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.statusDot {
+  padding: 4px 8px;
+  color: #164e45;
+  border-radius: 999px;
+  background: #ccfbf1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.eventList,
+.pageList {
+  display: grid;
+  gap: 10px;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #e8edf3;
+}
+
+.event span,
+.pageItem small {
+  overflow-wrap: anywhere;
+  color: #607086;
+}
+
+.pageItem {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.pageItem a {
+  color: #234f78;
+  font-weight: 800;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.meta span {
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #344256;
+  background: #eef2f6;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.errorText {
+  margin-top: 10px;
+  color: #991b1b;
+}
+
+@media (max-width: 860px) {
+  .appShell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .workspace {
+    padding: 20px;
+  }
+
+  .stats,
+  .fieldGrid,
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}

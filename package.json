@@ -3,13 +3,21 @@
   "version": "0.1.0",
   "description": "Converted distributed web crawler - Express backend + simple client",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server/index.js",
-    "client:build": "cd client && npm run build"
+    "dev": "node server/index.js",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "build": "npm --prefix client install && npm --prefix client run build"
   },
   "dependencies": {
     "axios": "^1.4.0",
+    "body-parser": "^1.20.2",
     "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.18.2",
     "mongoose": "^7.0.0"

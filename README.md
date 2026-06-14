@@ -1,8 +1,18 @@
-# MERN Crawler (converted)
+# MERN Crawler
 
-This is a minimal conversion of the distributed web crawler to a Node/Express backend with a simple client.
+This is the JavaScript/MERN conversion of the distributed crawler. The Python-style distributed pieces are represented with a Node crawler service, Express API routes, MongoDB persistence, and a React dashboard.
 
-Quick start
+## Features
+
+- Crawl a starting website with configurable depth and max page count
+- Extract page titles, text content, links, status, and errors
+- Store crawled pages in MongoDB
+- Maintain a Mongo-backed inverted term index
+- Search stored pages with MongoDB text search
+- Stream crawl progress to React with Server-Sent Events
+- View recent crawled pages and crawl metrics in the browser
+
+## Quick start
 
 1. Install dependencies
 
@@ -11,49 +21,89 @@ cd d:/single/mern-crawler
 npm install
 ```
 
-2. (Optional) set MongoDB URI in `.env` as `MONGODB_URI` or copy `.env.example` to `.env` and edit.
+2. Install client dependencies
 
-3. Run server
+```bash
+cd client
+npm install
+```
+
+3. Configure MongoDB
+
+Copy `.env.example` to `.env` and edit `MONGODB_URI` if needed.
+
+```bash
+cd ..
+copy .env.example .env
+```
+
+The crawler can fetch pages without MongoDB, but stored history and search need `MONGODB_URI`.
+
+4. Run the Express API
 
 ```bash
 npm start
 ```
 
-4. Open browser to `http://localhost:5000` and use the simple UI to crawl a site.
-
-Client (React) development
-
-1. Install client dependencies and run dev server
+5. Run the React dev server in another terminal
 
 ```bash
 cd client
-npm install
 npm run dev
 ```
 
-The React dev server runs on `http://localhost:5173` by default and will proxy API requests to the Express server if you configure a proxy. Alternatively, run the Express server and use it to serve the production build from `client/dist`.
+Open `http://localhost:5173`.
 
-Dev proxy
+## API
 
-The Vite dev server proxies `/api` to `http://localhost:5000` by default using `client/vite.config.js`. That means you can run the Express backend on port 5000 and the React dev server on 5173 without CORS issues.
+- `GET /health` - server health
+- `POST /api/crawl` - crawl immediately
+- `GET /api/crawl-stream` - stream crawl progress with Server-Sent Events
+- `GET /api/pages` - recent stored pages
+- `GET /api/search?q=keyword` - search indexed pages
 
-Production build served by Express
-
-To build the client and serve it from Express (production):
+Example crawl:
 
 ```bash
-cd client
-npm install
+curl -X POST http://localhost:5000/api/crawl \
+  -H "Content-Type: application/json" \
+  -d "{\"website\":\"https://example.com\",\"levels\":1,\"maxPages\":20}"
+```
+
+## Production build
+
+Build the React app and run Express with `NODE_ENV=production`:
+
+```bash
 npm run build
-cd ..
+$env:NODE_ENV="production"
 npm start
 ```
 
-Express will automatically serve the `client/dist` files when `NODE_ENV=production` and `client/dist` exists.
+Express serves `client/dist` after the API routes.
 
-Notes
+## Public Deployment
 
-- The crawler is implemented in `server/crawler.js` using `axios` + `cheerio`.
-- If `MONGODB_URI` is set and reachable, crawled pages will be persisted to MongoDB using the `Page` model at `server/models/Page.js`.
-- The server serves the static client from `client/` and exposes `POST /api/crawl`.
-- Next steps: convert the client into a React frontend and add more distributed node behaviour (nodes + health monitor) if you want.
+The project is ready for a public Node host such as Render.
+
+Render settings:
+
+- Root directory: `mern-crawler`
+- Build command: `npm install && npm run build`
+- Start command: `npm start`
+- Health check path: `/health`
+- Environment variables:
+  - `NODE_ENV=production`
+  - `MONGODB_URI=<your MongoDB Atlas connection string>`
+
+The included `render.yaml` can be used as a Render blueprint. A `Dockerfile` is also included for Docker-based hosts.
+
+## Project structure
+
+- `server/index.js` - Express API and static serving
+- `server/crawler.js` - Node crawler, extraction, BFS traversal, progress events
+- `server/models/Page.js` - MongoDB page document
+- `server/models/InvertedIndex.js` - MongoDB term index document
+- `client/src/App.jsx` - React crawler dashboard
+
+The old `distributed-crawler` folder is still present as a reference implementation. The active MERN conversion is in `mern-crawler`.

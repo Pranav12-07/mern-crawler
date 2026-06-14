@@ -9,14 +9,26 @@ export default function App() {
   const [pages, setPages] = useState([])
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState(null)
+  const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const canCrawl = useMemo(() => website.trim().length > 0 && !loading, [website, loading])
 
   useEffect(() => {
+    loadStatus()
     loadPages()
   }, [])
+
+  async function loadStatus() {
+    try {
+      const res = await fetch('/api/status')
+      const data = await res.json()
+      setStatus(data)
+    } catch (err) {
+      setStatus({ api: 'unknown', mongo: { connected: false, state: 'unknown' } })
+    }
+  }
 
   async function loadPages() {
     try {
@@ -47,6 +59,7 @@ export default function App() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Crawl failed')
       setResult(data)
+      await loadStatus()
       await loadPages()
     } catch (err) {
       setError(err.message)
@@ -77,6 +90,7 @@ export default function App() {
     es.addEventListener('done', async () => {
       setLoading(false)
       es.close()
+      await loadStatus()
       await loadPages()
     })
 
@@ -155,6 +169,12 @@ export default function App() {
           <div>
             <span>{events.length}</span>
             <p>Live events</p>
+          </div>
+          <div>
+            <span className={status?.mongo?.connected ? 'okText' : 'warnText'}>
+              {status?.mongo?.connected ? 'On' : 'Off'}
+            </span>
+            <p>MongoDB {status?.mongo?.state || 'checking'}</p>
           </div>
         </section>
 

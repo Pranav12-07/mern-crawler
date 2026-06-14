@@ -1,27 +1,30 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const crawler = require('./crawler');
 const Page = require('./models/Page');
+const { connectDatabase, getMongoStatus } = require('./config/database');
 
 dotenv.config();
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 const PORT = process.env.PORT || 5000;
 
-if (process.env.MONGODB_URI) {
-  mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error', err));
-}
+connectDatabase();
 
 const clientDist = path.join(__dirname, '../client/dist');
 
 app.get('/health', (req, res) => res.json({ status: 'healthy' }));
+
+app.get('/api/status', (req, res) => {
+  res.json({
+    api: 'healthy',
+    mongo: getMongoStatus()
+  });
+});
 
 app.post('/api/crawl', async (req, res) => {
   const { website, levels, maxPages } = req.body;

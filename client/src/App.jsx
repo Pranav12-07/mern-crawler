@@ -25,6 +25,34 @@ export default function App() {
     }
   }
 
+  function startStream(e) {
+    e.preventDefault()
+    setOutput('')
+    setLoading(true)
+    const url = `/api/crawl-stream?website=${encodeURIComponent(website)}&levels=${levels}`
+    const es = new EventSource(url)
+
+    es.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data)
+        setOutput((o) => o + JSON.stringify(msg) + '\n')
+      } catch (e) {
+        setOutput((o) => o + ev.data + '\n')
+      }
+    }
+
+    es.addEventListener('done', () => {
+      setLoading(false)
+      es.close()
+    })
+
+    es.onerror = (err) => {
+      setOutput((o) => o + 'Error or connection closed\n')
+      setLoading(false)
+      es.close()
+    }
+  }
+
   return (
     <div className="app">
       <h1>MERN Crawler</h1>
@@ -37,7 +65,8 @@ export default function App() {
           Levels
           <input type="number" value={levels} onChange={e => setLevels(Number(e.target.value))} min="0" />
         </label>
-        <button type="submit" disabled={loading}> {loading ? 'Crawling...' : 'Crawl'} </button>
+        <button type="submit" disabled={loading}> {loading ? 'Crawling...' : 'Crawl (one-shot)'} </button>
+        <button onClick={startStream} disabled={loading || !website}> {loading ? 'Crawling...' : 'Crawl (stream)'} </button>
       </form>
 
       <pre className="output">{output}</pre>

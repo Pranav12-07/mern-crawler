@@ -69,3 +69,49 @@ async function crawl(startUrl, levels = 1, options = { save: true }) {
 }
 
 module.exports = { crawl };
+
+// crawl with progress callbacks: expects options.send(msg)
+async function crawlWithProgress(startUrl, levels = 1, options = { save: true, send: null }) {
+  const visited = new Set();
+  const adjacency = {};
+  const queue = [{ url: startUrl, depth: 0 }];
+  visited.add(startUrl);
+
+  const send = options.send || (() => {});
+
+  await send({ type: 'started', url: startUrl, levels });
+
+  while (queue.length > 0) {
+    const { url, depth } = queue.shift();
+    if (depth > levels) continue;
+
+    await send({ type: 'fetching', url, depth });
+    const { html, links } = await fetchLinks(url);
+    adjacency[url] = links;
+
+    if (options.save && Page) {
+      try {
+        await Page.updateOne({ url }, { url, html, links, crawledAt: new Date() }, { upsert: true });
+        await send({ type: 'saved', url });
+      } catch (e) {
+        await send({ type: 'save_error', url, message: e.message || String(e) });
+      }
+    }
+
+    await send({ type: 'fetched', url, linksCount: links.length, depth });
+
+    if (depth < levels) {
+      for (const l of links) {
+        if (!visited.has(l)) {
+          visited.add(l);
+          queue.push({ url: l, depth: depth + 1 });
+        }
+      }
+    }
+  }
+
+  await send({ type: 'done', adjacencySummary: { nodes: Object.keys(adjacency).length } });
+  return adjacency;
+}
+
+module.exports = { crawl, crawlWithProgress };

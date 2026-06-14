@@ -41,4 +41,34 @@ app.post('/api/crawl', async (req, res) => {
   }
 });
 
+// Server-Sent Events endpoint for streaming crawl progress
+app.get('/api/crawl-stream', (req, res) => {
+  const website = req.query.website;
+  const levels = parseInt(req.query.levels) || 1;
+  if (!website) return res.status(400).json({ error: 'website is required' });
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders && res.flushHeaders();
+
+  const send = (msg) => {
+    try {
+      res.write(`data: ${JSON.stringify(msg)}\n\n`);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  crawler.crawlWithProgress(website, levels, { save: true, send })
+    .then(() => {
+      res.write('event: done\ndata: {}\n\n');
+      res.end();
+    })
+    .catch((err) => {
+      res.write(`event: error\ndata: ${JSON.stringify({ message: err.message })}\n\n`);
+      res.end();
+    });
+});
+
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
